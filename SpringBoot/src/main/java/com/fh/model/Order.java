@@ -25,7 +25,7 @@ public class Order {
     @TableField("createDate")
     private Date createDate;//创建时间
     @TableField("vipName")
-    private String vipName;//创建时间
+    private String vipName;
 
 
     public Integer getId() {

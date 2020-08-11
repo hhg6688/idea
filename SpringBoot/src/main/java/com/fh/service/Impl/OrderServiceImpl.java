@@ -2,10 +2,14 @@ package com.fh.service.Impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fh.common.ExceptionAll.CountException;
+import com.fh.dao.AddressDao;
+import com.fh.dao.OrderCartDao;
 import com.fh.dao.OrderDao;
 import com.fh.dao.ShopDao;
 import com.fh.enums.PayStatusEnum;
+import com.fh.model.Address;
 import com.fh.model.Order;
 import com.fh.model.OrderCart;
 import com.fh.model.Shop;
@@ -30,6 +34,10 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private ShopDao shopDao;
     @Autowired
+    private OrderCartDao orderCartDao;
+    @Autowired
+    private AddressDao addressDao;
+    @Autowired
     private HttpServletRequest request;
 
     @Override
@@ -41,6 +49,7 @@ public class OrderServiceImpl implements OrderService {
         order.setAddressId(addressId);
         order.setCreateDate(new Date());
         order.setPayType(payType);
+        order.setVipName("18303903715");
         order.setPayStatus(PayStatusEnum.PAY_STATUS_INIT.getStatus());
         //设置购买个数
         Integer proTypeCount=0;
@@ -89,6 +98,7 @@ public class OrderServiceImpl implements OrderService {
         }
         map.put("code",200);
         map.put("orderId",order.getId());
+        map.put("payType",order.getPayType());
         map.put("totalMoney",totalMoney);
         return map;
     }
@@ -170,5 +180,25 @@ public class OrderServiceImpl implements OrderService {
         }
         return 0;
     }
+
+    @Override
+    public Map selectOrder() {
+        Map map=new HashMap();
+        Map user= (Map) request.getAttribute("login_hhg");
+        String iphoneNum = (String) user.get("iphoneNum");
+        QueryWrapper<Order> qw= new QueryWrapper<>();
+        qw.eq("vipName",iphoneNum);
+        //根据当前用户查询order表
+        List<Order> orders = orderDao.selectList(qw);
+        map.put("orders",orders);
+
+        return map;
+    }
+
+    @Override
+    public Order selectOrderById(Integer orderId) {
+        return   orderDao.selectById(orderId);
+    }
+
 
 }
