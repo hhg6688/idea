@@ -22,7 +22,7 @@ public class RedisUtils {
         jedisPoolConfig.setMinIdle(1);
         jedisPoolConfig.setMaxWaitMillis(30000);
         //初始化redis池
-        jedisPool=new JedisPool(jedisPoolConfig,"192.168.239.135",6379);
+        jedisPool=new JedisPool(jedisPoolConfig,"192.168.239.136",6379);
     }
     //从池中拿连接
     public static Jedis getJedis(){

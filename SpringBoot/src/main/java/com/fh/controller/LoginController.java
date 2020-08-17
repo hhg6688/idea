@@ -21,7 +21,7 @@ public class LoginController {
     }
 
     @RequestMapping("loginUser")
-    public jsonData loginUser(String iphoneNum, String code){
+    public jsonData loginUser(String iphoneNum, String code,Integer isLogin){
         Map logMap=new HashMap();
         //获取存在redis的code码
         String redisCode = RedisUser.get(iphoneNum + "_hhg");
@@ -29,13 +29,24 @@ public class LoginController {
             if (redisCode.equals(code)){
                 Map user=new HashMap();
                 user.put("iphoneNum",iphoneNum);
-                //生成秘钥  并设置过期时间
-                String sign = JWT.sign(user, 1000 * 60 * 60 * 24);
+                user.put("isLogin",isLogin);
+                String sign="";
+                if (isLogin==1){
+                    //生成秘钥  并设置过期时间为七天
+                     sign = JWT.sign(user, 1000 * 60 * 60 * 24*7);
+                }else{
+                    //生成秘钥  并设置过期时间
+                    sign = JWT.sign(user, 1000 * 60 * 60 * 24);
+                }
                 // 加签 手机号加sign值  目的 为了防止篡改数据
                 String token = Base64.getEncoder().encodeToString((iphoneNum + "," + sign).getBytes());
-                //将最新的秘钥存到redis里， 确保生成的多个秘钥最新的是有用的
-                RedisUser.set("token_"+iphoneNum,sign,60*30);
-
+                if (isLogin==1){
+                    //将最新的秘钥存到redis里， 确保生成的多个秘钥最新的是有用的 并设置过期时间为七天
+                    RedisUser.set("token_"+iphoneNum,sign,60*30*2*24*7);
+                }else{
+                    //将最新的秘钥存到redis里， 确保生成的多个秘钥最新的是有用的
+                    RedisUser.set("token_"+iphoneNum,sign,60*30);
+                }
                 logMap.put("status","200");
                 logMap.put("message","登录成功");
                 logMap.put("token",token);

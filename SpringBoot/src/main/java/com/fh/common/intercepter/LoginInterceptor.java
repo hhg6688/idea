@@ -37,15 +37,21 @@ public class LoginInterceptor implements HandlerInterceptor {
         if (user == null){
             throw new LoginException("没有登录");
         }
-        if (user  != null ){//jwt验证过了
+        if (user != null ){//jwt验证过了
             String sign_redis = RedisUser.get("token_" + iphoneNum);
             if(!sign.equals(sign_redis)){//验证秘钥是不是最新的
                 //返回json字符串
                 throw new LoginException("验证已过期，重新登录");
             }
         }
-        //前面逻辑验证过了 设置redis key值得有效时间为30分
-        RedisUser.set("token_"+user.get("iphoneNum"),sign,60*30);
+        if ((Integer)user.get("isLogin")==0){
+            //前面逻辑验证过了 设置redis key值得有效时间为30分
+            RedisUser.set("token_"+user.get("iphoneNum"),sign,60*30);
+        }else{
+            //前面逻辑验证过了 设置redis key值得有效时间为30分
+            RedisUser.set("token_"+user.get("iphoneNum"),sign,60*30*2*24*7);
+        }
+
         //将用户信息放入request中 方便后面需求处理
         request.setAttribute("login_hhg",user);
         return true;
